@@ -152,6 +152,11 @@ h1 {
   gap: 10px 12px;
   margin-bottom: 14px;
 }
+.info { max-width: 720px; }
+.info h2 { margin-top: 22px; }
+.info p { line-height: 1.6; margin: 6px 0 0; }
+.info .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.linkrow { margin-top: 18px; }
 .quick { display: flex; gap: 8px; flex-wrap: wrap; }
 .small-btn {
   min-height: 44px;
@@ -651,6 +656,29 @@ h1 {
       <p class="legend" id="storeNote"></p>
     </div>
   </div>
+  <p class="linkrow"><button type="button" class="small-btn" id="infoBtn">Info en privacy</button> <a class="small-btn" href="privacy.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">Privacyverklaring</a></p>
+  </section>
+
+  <section id="view-info" hidden>
+    <div class="info">
+      <h1>Info en privacy</h1>
+      <div class="panel">
+<h2>Wat bewaart de app?</h2>
+<p>Alleen je eigen keuzes: welke tafels of onderwerpen je oefent, de moeilijkheid, het aantal vragen en hoeveel sterren en spelletjes je hebt. Dat staat op het toestel zelf, in de opslag van de browser of de app. Het verlaat het toestel nooit.</p>
+<h2>Wat bewaart de app niet?</h2>
+<p>Geen naam, geen e-mailadres, geen account, geen locatie en geen foto's. Er zijn geen cookies, geen reclame, geen statistieken en geen verbinding met diensten van derden. Er worden dus ook geen gegevens gedeeld of verkocht.</p>
+<h2>Internet</h2>
+<p>De app werkt ook zonder internet. De Android-app heeft geen internet nodig. De website staat op GitHub Pages. GitHub kan bij een bezoek tijdelijk technische gegevens zoals een IP-adres verwerken om de pagina te tonen. Dat gebeurt niet door deze app.</p>
+<h2>Kinderen</h2>
+<p>De app is gemaakt voor kinderen in het lager onderwijs. Omdat er geen persoonsgegevens worden verzameld, hoeven kinderen of ouders niets in te vullen of toe te staan.</p>
+<h2>Gegevens wissen</h2>
+<p>Je kan alle bewaarde keuzes en sterren wissen met de knop hieronder, of door de app te verwijderen of de browsergegevens van de site te wissen.</p>
+        <div class="actions">
+          <button type="button" class="small-btn" id="wipe">Bewaarde gegevens wissen</button>
+          <button type="button" class="primary" id="infoBack">Terug</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="view-quiz" hidden>
@@ -829,7 +857,7 @@ h1 {
   }
   function listNL(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' en ' + a[a.length - 1] : String(a[0]); }
   function show(name) {
-    ['setup', 'quiz', 'game', 'done'].forEach(function (v) { $('view-' + v).hidden = (v !== name); });
+    ['setup', 'quiz', 'game', 'done', 'info'].forEach(function (v) { $('view-' + v).hidden = (v !== name); });
     window.scrollTo(0, 0);
   }
 
@@ -1669,6 +1697,22 @@ h1 {
     startSession();
   });
   $('back').addEventListener('click', function () { renderSetup(); show('setup'); });
+
+  /* ---------- Info en privacy ---------- */
+  var wipeArmed = false, wipeTimer;
+  $('infoBtn').addEventListener('click', function () { show('info'); });
+  $('infoBack').addEventListener('click', function () { renderSetup(); show('setup'); });
+  $('wipe').addEventListener('click', function () {
+    var b = $('wipe');
+    if (!wipeArmed) {
+      wipeArmed = true; b.textContent = 'Zeker wissen? Tik nog eens';
+      wipeTimer = setTimeout(function () { wipeArmed = false; b.textContent = 'Bewaarde gegevens wissen'; }, 4000);
+      return;
+    }
+    clearTimeout(wipeTimer);
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    location.reload();
+  });
 
   /* ---------- Spelletje: teller en beloning ---------- */
   var STAR = '<svg viewBox="0 0 20 20" aria-hidden="true"><polygon points="10,1.5 12.6,7.2 18.8,7.9 14.2,12.1 15.5,18.2 10,15.1 4.5,18.2 5.8,12.1 1.2,7.9 7.4,7.2"/></svg>';

@@ -1,7 +1,7 @@
 /* Zorgt dat Tafelkampioen ook zonder internet start. Verhoog VERSIE na een aanpassing. */
-var VERSIE = 'rekenkampioen-v4';
+var VERSIE = 'rekenkampioen-v6';
 var BESTANDEN = [
-  './', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
+  './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'fonts/baloo-2-latin-600-normal.woff2', 'fonts/baloo-2-latin-800-normal.woff2',
   'fonts/lexend-latin-400-normal.woff2', 'fonts/lexend-latin-500-normal.woff2', 'fonts/lexend-latin-600-normal.woff2'
 ];
