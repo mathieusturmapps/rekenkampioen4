@@ -157,6 +157,36 @@ h1 {
 .info p { line-height: 1.6; margin: 6px 0 0; }
 .info .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .linkrow { margin-top: 18px; }
+/* Leerjaren */
+.tiles.years { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (min-width: 560px) { .tiles.years { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.tiles.years .tile { min-height: 92px; }
+.tiles.years .tile .lab { font-size: 0.72rem; text-align: center; font-size: 0.68rem; overflow-wrap: normal; }
+.yhead { margin-top: 22px; }
+.tiles.topics.yt .tile .num { font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
+.expr.xlong { font-size: clamp(1.7rem, 5vw, 2.8rem); }
+.row .n.yi { font-size: 1rem; overflow: hidden; }
+.expr.b.long { font-size: clamp(1.7rem, 6vw, 3.2rem); }
+.dice-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.die { width: 64px; height: 64px; box-sizing: border-box; border: 3px solid var(--ink); border-radius: 14px; background: #FFFFFF; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 7px; }
+.die i { width: 80%; height: 80%; place-self: center; border-radius: 50%; background: #1B2440; visibility: hidden; }
+.die i.on { visibility: visible; }
+.tenframe { display: grid; grid-template-columns: repeat(5, 34px); gap: 6px; justify-content: center; }
+.tenframe i { width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; border: 2.5px solid var(--ink); }
+.tenframe i.on { background: var(--marker); }
+.money { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.coin, .note { display: inline-flex; align-items: center; justify-content: center; border: 3px solid #1B2440; color: #1B2440; font: 800 1.3rem var(--font-display); }
+.coin { width: 58px; height: 58px; border-radius: 50%; }
+.coin.v1 { background: #DDE2EE; }
+.coin.v2 { background: #F2D06B; }
+.note { min-width: 96px; height: 56px; border-radius: 8px; }
+.note.v5 { background: #BFDDCB; }
+.note.v10 { background: #F4C9C9; }
+.shop { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; }
+.item { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); }
+.item .em { font-size: 2.4rem; line-height: 1; }
+.item .tag { font: 800 1.15rem var(--font-display); background: var(--marker); color: var(--on-marker); padding: 2px 10px; border-radius: 8px; }
+.pay { font: 800 1.15rem var(--font-display); }
 .quick { display: flex; gap: 8px; flex-wrap: wrap; }
 .small-btn {
   min-height: 44px;
@@ -537,13 +567,29 @@ h1 {
     <div id="setupR" hidden>
     <div class="setup">
       <div class="panel">
-        <div class="panel-head"><h2>Hoe ver reken je?</h2></div>
+        <div class="panel-head"><h2>Welk leerjaar?</h2></div>
+        <div class="tiles ranges years" id="ytiles" role="radiogroup" aria-label="Leerjaar"></div>
+        <div id="freeBox">
+        <div class="panel-head yhead"><h2>Hoe ver reken je?</h2></div>
         <div class="tiles ranges" id="rtiles" role="radiogroup" aria-label="Hoe ver reken je?"></div>
         <p class="legend">Dat is de grootste uitkomst die voorkomt. Bij aftrekken is dat het grootste getal waarmee je begint.</p>
+        </div>
+        <div id="yearBox" hidden>
+          <div class="panel-head yhead">
+            <h2>Welke onderdelen?</h2>
+            <div class="quick">
+              <button type="button" class="small-btn" id="yAllPractice">Alles oefenen</button>
+              <button type="button" class="small-btn" id="yAllKnown">Alles gekend</button>
+            </div>
+          </div>
+          <div class="tiles topics yt" id="ytopics"></div>
+          <p class="legend">Geel gemarkeerd: je oefent dit onderdeel. Streepjeslijn: je kent het al. Doorgestreept en gearceerd: de juf heeft het nog niet gezien, dus het komt niet aan bod.</p>
+        </div>
         <div id="slotGameR"></div>
       </div>
 
       <div class="panel">
+        <div id="freeOpts">
         <div class="field">
           <h2 id="lblModeR">Wat oefen je?</h2>
           <div class="seg" role="radiogroup" aria-labelledby="lblModeR">
@@ -571,6 +617,8 @@ h1 {
           </div>
         </div>
 
+        </div>
+
         <div class="field">
           <h2 id="lblCountR">Aantal vragen</h2>
           <div class="seg compact" role="radiogroup" aria-labelledby="lblCountR">
@@ -580,6 +628,13 @@ h1 {
           </div>
         </div>
 
+
+        <div class="field" id="yReviewField" hidden>
+          <button type="button" class="switch" id="yReview" role="switch" aria-checked="true">
+            <span class="track" aria-hidden="true"></span>
+            <span class="txt">Gekende onderdelen af en toe herhalen<small>Ongeveer één vraag op vijf komt uit een onderdeel dat je kent.</small></span>
+          </button>
+        </div>
 
         <div id="slotGoalR"></div>
 
@@ -759,7 +814,7 @@ h1 {
   var CHECK = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   /* T: instellingen voor de tafels. K: instellingen voor optellen en aftrekken. state: wat voor beide geldt. */
   var T = { known: [], later: [], mode: 'mal', count: 10, review: true };
-  var K = { mode: 'plus', range: 10, bridge: 'both', round: 'both', count: 10 };
+  var K = { mode: 'plus', range: 10, bridge: 'both', round: 'both', count: 10, year: 0, yr: true, ys: {} };
   var B = { known: [], later: [], diff: 'mid', count: 10, review: true };
   var state = { section: 't', goal: 3, series: 0, games: 0, best: 0 };
   var storageOk = true;
@@ -781,6 +836,16 @@ h1 {
     if (inList(s.round, ['ronde', 'gewoon', 'both'])) K.round = s.round;
     if (inList(s.bridge, ['no', 'yes', 'both'])) K.bridge = s.bridge;
     if (inList(s.count, [10, 20, 30])) K.count = s.count;
+    if (inList(s.year, [0, 1, 2, 3, 4, 5, 6])) K.year = s.year;
+    if (typeof s.yr === 'boolean') K.yr = s.yr;
+    if (s.ys && typeof s.ys === 'object') {
+      [1, 2, 3, 4, 5, 6].forEach(function (y) {
+        var o = s.ys[y];
+        if (!o || !Array.isArray(o.known) || !Array.isArray(o.later)) return;
+        var known = o.known.filter(function (n) { return inList(n, [1, 2, 3, 4, 5, 6, 7, 8]); });
+        K.ys[y] = { known: known, later: o.later.filter(function (n) { return inList(n, [1, 2, 3, 4, 5, 6, 7, 8]) && known.indexOf(n) < 0; }) };
+      });
+    }
   }
   function readB(s) {
     if (Array.isArray(s.known)) B.known = s.known.filter(function (n) { return inList(n, BALL); });
@@ -958,7 +1023,7 @@ h1 {
   bindChoice('bridge', 'bridge', false);
   bindChoice('round', 'round', false);
 
-  function renderRek() {
+  function renderRekFree() {
     var R = K.range, m = K.mode === 'min' ? 'min' : 'plus';
     rtilesEl.querySelectorAll('.tile').forEach(function (b) {
       var r = +b.dataset.r, on = (r === R);
@@ -989,7 +1054,7 @@ h1 {
   /* ---------- Kiezen tussen tafels en optellen en aftrekken ---------- */
   var LEAD = {
     t: 'Tik op een tafel om te wisselen tussen oefenen, gekend en nog niet gezien in de klas. Je krijgt alleen sommen uit de tafels die je oefent.',
-    r: 'Oefen optellen en aftrekken. Kies hoe ver je rekent: tot 10, 20, 100, 1000 of 10 000.',
+    r: 'Oefen optellen en aftrekken. Kies je leerjaar, of kies Vrij om zelf te bepalen hoe ver je rekent.',
     b: 'Oefen breuken zoals je ze in het lager leert: aflezen, kleuren, vergelijken, gelijkwaardige breuken, rekenen en kommagetallen. Tik op een onderwerp om te wisselen tussen oefenen, gekend en nog niet gezien in de klas.'
   };
   function placeShared() {
@@ -1061,6 +1126,7 @@ h1 {
 
   /* ---------- Vragen maken ---------- */
   function buildR() {
+    if (K.year) return buildY();
     var out = [], seen = {}, R = K.range;
     for (var i = 0; i < K.count; i++) {
       var q, tries = 0;
@@ -1076,6 +1142,354 @@ h1 {
       out.push(q);
     }
     return out;
+  }
+
+  /* ---------- Leerjaren 1 tot 6 ---------- */
+  var YALL = [1, 2, 3, 4, 5, 6, 7, 8];
+  var YLAB = ['zelf kiezen', 'tot 20', 'tot 100', 'tot 1000', 'tot 10\u00A0000', 'tot 1\u00A0miljoen', 'grote getallen'];
+  var YT = {
+    1: [['Splitsen tot 10', '5=2+3'], ['Optellen tot 10', '+'], ['Aftrekken tot 10', '−'], ['Tot 20 zonder brug', '12+5'], ['Over het tiental', '8+5'], ['Dobbelstenen', '🎲'], ['Munten en briefjes', '€'], ['Winkeltje', '🍎']],
+    2: [['Tot 20 herhalen', '↻'], ['Tientallen', '30+40'], ['Optellen zonder brug', '34+25'], ['Aftrekken zonder brug', '58−24'], ['Optellen met brug', '38+27'], ['Aftrekken met brug', '52−27'], ['Ontbrekend getal', '?+27=64'], ['Winkeltje', '🥕']],
+    3: [['Tot 100 herhalen', '↻'], ['Ronde getallen', '300'], ['Optellen zonder brug', '342+516'], ['Aftrekken zonder brug', '758−324'], ['Optellen met brug', '348+276'], ['Aftrekken met brug', '752−327'], ['Ontbrekend getal', '?+27=64'], ['Schatten', '≈']],
+    4: [['Tot 1000 herhalen', '↻'], ['Ronde getallen', '3000'], ['Optellen zonder brug', '3421+5163'], ['Aftrekken zonder brug', '7584−3241'], ['Optellen met brug', '3487+2765'], ['Aftrekken met brug', '7523−2768'], ['Ontbrekend getal', '?+27=64'], ['Schatten', '≈']],
+    5: [['Tot 10 000 herhalen', '↻'], ['Ronde getallen', '40\u00A0000'], ['Optellen', '+'], ['Aftrekken', '−'], ['Meerdere termen', '+ + −'], ['Ontbrekend getal', '?+27=64'], ['Schatten', '≈'], ['Handig rekenen', '💡']],
+    6: [['Tot 1\u00A0000\u00A0000 herhalen', '↻'], ['Ronde getallen', '3\u00A0000\u00A0000'], ['Optellen', '+'], ['Aftrekken', '−'], ['Meerdere termen', '+ + −'], ['Ontbrekend getal', '?+27=64'], ['Schatten', '≈'], ['Handig rekenen', '💡']]
+  };
+  var YBASIC = { 1: [2, 3, 4, 5], 2: [3, 4, 5, 6], 3: [3, 4, 5, 6], 4: [3, 4, 5, 6], 5: [3, 4] };
+  var YSPEC = { 2: { lo: 2, hi: 2, max: 100 }, 3: { lo: 3, hi: 3, max: 1000 }, 4: { lo: 4, hi: 4, max: 10000 }, 5: { lo: 5, hi: 6, max: 1000000 }, 6: { lo: 7, hi: 9, max: 1000000000 } };
+  var YUNITS = { 2: [10], 3: [10, 100], 4: [100, 1000], 5: [1000, 10000, 100000], 6: [100000, 1000000, 10000000] };
+  var YROUND = { 3: 100, 4: 100, 5: 1000, 6: 100000 };
+  var YROUNDNAME = { 100: 'honderdtallen', 1000: 'duizendtallen', 100000: 'honderdduizendtallen' };
+  var FOOD = ['🍎', '🥕', '🍌', '🍅', '🍐', '🍓', '🥦', '🌽'];
+
+  function nf(n) { var s = String(n); return n >= 10000 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : s; }
+  function rd(D) { return D <= 1 ? rnd(1, 9) : rnd(Math.pow(10, D - 1), Math.pow(10, D) - 1); }
+  function opSign(type) { return type === 'plus' ? ' + ' : ' − '; }
+  function plainQ(t, type, a, b) {
+    if (type === 'plus' && Math.random() < 0.5) { var x = a; a = b; b = x; }
+    return { topic: t, cat: t, type: type, text: nf(a) + opSign(type) + nf(b), ans: type === 'plus' ? a + b : a - b, key: t + ':' + a + type + b };
+  }
+  function sumRaw(y, type, want) {
+    var sp = YSPEC[y], a, b, D, tries, x;
+    for (tries = 0; tries < 800; tries++) {
+      D = rnd(sp.lo, sp.hi);
+      a = rd(D);
+      b = y === 2 ? (Math.random() < 0.4 ? rnd(1, 9) : rnd(10, 99)) : rd(Math.max(1, rnd(D - 1, D)));
+      if (type === 'plus') { if (a + b > sp.max) continue; }
+      else { if (a < b) { x = a; a = b; b = x; } if (a === b) continue; }
+      if (want === null || hasBridge(type, a, b, sp.max) === want) break;
+    }
+    return { a: a, b: b };
+  }
+  function die(n) {
+    var pips = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] }[n], s = '<span class="die" role="img" aria-label="Dobbelsteen met ' + n + ' ogen">', i;
+    for (i = 0; i < 9; i++) s += '<i' + (pips.indexOf(i) > -1 ? ' class="on"' : '') + '></i>';
+    return s + '</span>';
+  }
+  function tenFrame(n) {
+    var s = '<div class="tenframe" role="img" aria-label="' + n + ' bolletjes">', i;
+    for (i = 0; i < 10; i++) s += '<i' + (i < n ? ' class="on"' : '') + '></i>';
+    return s + '</div>';
+  }
+  function moneyHTML(list) {
+    return '<div class="money" role="img" aria-label="Geld">' + list.map(function (v) {
+      return v >= 5 ? '<span class="note v' + v + '">€ ' + v + '</span>' : '<span class="coin v' + v + '">' + v + '</span>';
+    }).join('') + '</div>';
+  }
+  function shopItem(em, price) { return '<span class="item"><span class="em">' + em + '</span><span class="tag">€ ' + price + '</span></span>'; }
+  function eurAns(base, prompt, visual, ans, show, key) {
+    return Object.assign(base, { kind: 'num', prompt: prompt, visual: visual, html: '<span>€</span>{ans}', aria: prompt, ans: ans, show: show, key: key });
+  }
+  function shuffled(list) { return shuffle(list.slice()); }
+
+  function genY1(t) {
+    var base = { topic: t, cat: t }, a, b, n, i, foods;
+    if (t === 1) {
+      n = rnd(2, 10); a = rnd(1, n - 1);
+      return Object.assign(base, { kind: 'num', prompt: 'Splits het getal. Hoeveel ontbreekt er?', visual: tenFrame(n), html: '<span>' + n + ' = ' + a + ' +</span>{ans}', aria: n + ' is ' + a + ' plus hoeveel', ans: n - a, show: n + ' = ' + a + ' + ' + (n - a) + '.', key: '1:' + n + '-' + a });
+    }
+    if (t === 2) { a = rnd(1, 9); b = rnd(1, 10 - a); return plainQ(t, 'plus', a, b); }
+    if (t === 3) { a = rnd(2, 10); b = rnd(1, a - 1); return plainQ(t, 'min', a, b); }
+    if (t === 4) {
+      if (Math.random() < 0.5) {
+        do { a = rnd(10, 19); b = rnd(1, 9); } while (a % 10 + b > 9);
+        return plainQ(t, 'plus', a, b);
+      }
+      a = rnd(11, 19); b = rnd(1, a % 10);
+      return plainQ(t, 'min', a, b);
+    }
+    if (t === 5) {
+      if (Math.random() < 0.5) { a = rnd(2, 9); b = rnd(11 - a, 9); return plainQ(t, 'plus', a, b); }
+      a = rnd(11, 18); b = rnd(Math.max(2, a - 9), 9);
+      return plainQ(t, 'min', a, b);
+    }
+    if (t === 6) {
+      a = rnd(1, 6); b = rnd(1, 6);
+      if (Math.random() < 0.7) {
+        return Object.assign(base, { kind: 'num', prompt: 'Hoeveel ogen zijn dit samen?', visual: '<div class="dice-row">' + die(a) + die(b) + '</div>', html: '{ans}', aria: 'Hoeveel ogen samen', ans: a + b, show: a + ' + ' + b + ' = ' + (a + b) + '.', key: '6:' + a + '+' + b });
+      }
+      while (a === b) b = rnd(1, 6);
+      if (a < b) { n = a; a = b; b = n; }
+      return Object.assign(base, { kind: 'num', prompt: 'Hoeveel ogen meer heeft de grootste dobbelsteen?', visual: '<div class="dice-row">' + die(a) + die(b) + '</div>', html: '{ans}', aria: 'Hoeveel ogen meer', ans: a - b, show: a + ' − ' + b + ' = ' + (a - b) + '.', key: '6:' + a + '-' + b });
+    }
+    if (t === 7) {
+      var vals = [1, 2, 5, 10], list = [], tot = 0, cnt = rnd(2, 5), opts, v;
+      for (i = 0; i < cnt; i++) {
+        opts = vals.filter(function (x) { return tot + x <= 20; });
+        if (!opts.length) break;
+        v = pick(opts); list.push(v); tot += v;
+      }
+      if (tot < 2) { list.push(1); tot += 1; }
+      list.sort(function (x, y) { return y - x; });
+      return eurAns(base, 'Hoeveel euro is dit samen?', moneyHTML(list), tot, list.join(' + ') + ' = ' + tot + '.', '7:' + list.join(','));
+    }
+    foods = shuffled(FOOD);
+    if (Math.random() < 0.5) {
+      a = rnd(1, 9); b = rnd(1, Math.min(10, 20 - a));
+      return eurAns(base, 'Hoeveel euro kosten ze samen?', '<div class="shop">' + shopItem(foods[0], a) + shopItem(foods[1], b) + '</div>', a + b, a + ' + ' + b + ' = ' + (a + b) + '.', '8:' + a + '+' + b);
+    }
+    var pay = pick([5, 10, 10, 20]); a = rnd(1, pay - 1);
+    return eurAns(base, 'Je betaalt met een briefje. Hoeveel euro krijg je terug?', '<div class="shop">' + shopItem(foods[0], a) + '<span class="pay">Je betaalt € ' + pay + '</span></div>', pay - a, pay + ' − ' + a + ' = ' + (pay - a) + '.', '8:' + pay + '-' + a);
+  }
+  function genTens() {
+    var t = 2, a, b, i;
+    if (Math.random() < 0.5) {
+      if (Math.random() < 0.5) { i = rnd(1, 8); return plainQ(t, 'plus', i * 10, rnd(1, 10 - i) * 10); }
+      return plainQ(t, 'plus', rnd(1, 9) * 10, rnd(1, 9));
+    }
+    if (Math.random() < 0.5) { a = rnd(2, 10); return plainQ(t, 'min', a * 10, rnd(1, a - 1) * 10); }
+    a = rnd(1, 9) * 10 + rnd(1, 9);
+    return plainQ(t, 'min', a, Math.random() < 0.5 ? a % 10 : a - a % 10);
+  }
+  function genShop100() {
+    var base = { topic: 8, cat: 8 }, foods = shuffled(FOOD), a, b, pay;
+    if (Math.random() < 0.5) {
+      a = rnd(11, 59); b = rnd(5, Math.min(60, 100 - a));
+      return eurAns(base, 'Hoeveel euro kosten ze samen?', '<div class="shop">' + shopItem(foods[0], a) + shopItem(foods[1], b) + '</div>', a + b, a + ' + ' + b + ' = ' + (a + b) + '.', '8:' + a + '+' + b);
+    }
+    pay = pick([50, 100]); a = rnd(11, pay - 3);
+    return eurAns(base, 'Je betaalt met een briefje. Hoeveel euro krijg je terug?', '<div class="shop">' + shopItem(foods[0], a) + '<span class="pay">Je betaalt € ' + pay + '</span></div>', pay - a, pay + ' − ' + a + ' = ' + (pay - a) + '.', '8:' + pay + '-' + a);
+  }
+  function genRoundY(y, t) {
+    var type = Math.random() < 0.5 ? 'plus' : 'min', u = pick(YUNITS[y]), m = Math.floor(YSPEC[y].max / u), i, j;
+    if (type === 'plus') { i = rnd(1, Math.min(99, m - 1)); j = rnd(1, Math.min(99, m - i)); return plainQ(t, 'plus', i * u, j * u); }
+    i = rnd(2, Math.min(99, m)); j = rnd(1, i - 1);
+    return plainQ(t, 'min', i * u, j * u);
+  }
+  function genMissY(y, t) {
+    var type = Math.random() < 0.5 ? 'plus' : 'min', r = sumRaw(y, type, null), a = r.a, b = r.b, c = type === 'plus' ? a + b : a - b, op = type === 'plus' ? '+' : '−', v = Math.random() < 0.5, html, ans;
+    if (v) { html = '<span>' + nf(a) + ' ' + op + '</span>{ans}<span>= ' + nf(c) + '</span>'; ans = b; }
+    else { html = '{ans}<span>' + op + ' ' + nf(b) + ' = ' + nf(c) + '</span>'; ans = a; }
+    return { topic: t, cat: t, kind: 'num', prompt: 'Vul het ontbrekende getal in.', html: html, aria: 'Vul het ontbrekende getal in', ans: ans, show: nf(a) + ' ' + op + ' ' + nf(b) + ' = ' + nf(c) + '.', key: t + ':' + a + op + b + v };
+  }
+  function roundTo(n, u) { return Math.round(n / u) * u; }
+  function genEstY(y, t) {
+    var u = YROUND[y], type, r, a, b, ra, rb, tries = 0;
+    do {
+      type = Math.random() < 0.5 ? 'plus' : 'min';
+      r = sumRaw(y, type, null); a = r.a; b = r.b; ra = roundTo(a, u); rb = roundTo(b, u); tries++;
+    } while (tries < 200 && (a % u === u / 2 || b % u === u / 2 || (type === 'min' && ra <= rb) || rb === 0));
+    var ans = type === 'plus' ? ra + rb : ra - rb, op = type === 'plus' ? '+' : '−';
+    return { topic: t, cat: t, kind: 'num', prompt: 'Rond elk getal af op ' + YROUNDNAME[u] + ' en schat de uitkomst.', html: '<span>' + nf(a) + ' ' + op + ' ' + nf(b) + ' ≈</span>{ans}', aria: 'Schat ' + a + ' ' + op + ' ' + b, ans: ans, show: 'Afgerond: ' + nf(ra) + ' ' + op + ' ' + nf(rb) + ' = ' + nf(ans) + '.', key: t + ':' + a + op + b };
+  }
+  function genMultiY(y, t) {
+    var dsp = y === 5 ? [4, 5] : [6, 8], max = YSPEC[y].max, n, a, b, c, d, text, ans, tries;
+    for (tries = 0; tries < 300; tries++) {
+      a = rd(rnd(dsp[0], dsp[1])); b = rd(rnd(dsp[0], dsp[1])); c = rd(rnd(dsp[0], dsp[1])); d = rd(rnd(dsp[0], dsp[1]));
+      n = Math.random();
+      if (n < 0.4) { ans = a + b + c; text = nf(a) + ' + ' + nf(b) + ' + ' + nf(c); }
+      else if (n < 0.55) { ans = a + b + c + d; text = nf(a) + ' + ' + nf(b) + ' + ' + nf(c) + ' + ' + nf(d); }
+      else { if (c >= a + b) continue; ans = a + b - c; text = nf(a) + ' + ' + nf(b) + ' − ' + nf(c); }
+      if (ans <= max && ans > 0) break;
+    }
+    return { topic: t, cat: t, type: 'plus', text: text, ans: ans, key: t + ':' + text };
+  }
+  function genHandyY(y, t) {
+    var u, base, d, a, b, ans, r;
+    if (y === 6 && Math.random() < 0.6) {
+      var x = rnd(1, 9) * 100;
+      if (Math.random() < 0.5) {
+        a = rnd(11, 98) * 100; b = rnd(11, 98) * 100;
+        return { topic: t, cat: t, kind: 'num', prompt: 'Wat moet er staan? De som blijft gelijk.', html: '<span>' + nf(a) + ' + ' + nf(b) + ' =</span><span>' + nf(a + x) + ' +</span>{ans}', aria: 'Optellingswip', ans: b - x, show: 'Je telt ' + nf(x) + ' bij het eerste getal, dus trek je ' + nf(x) + ' af van het tweede: ' + nf(b) + ' − ' + nf(x) + ' = ' + nf(b - x) + '.', key: t + ':w' + a + b + x };
+      }
+      a = rnd(50, 99) * 100; b = rnd(11, 49) * 100;
+      return { topic: t, cat: t, kind: 'num', prompt: 'Wat moet er staan? Het verschil blijft gelijk.', html: '<span>' + nf(a) + ' − ' + nf(b) + ' =</span><span>' + nf(a + x) + ' −</span>{ans}', aria: 'Aftrekkingshalter', ans: b + x, show: 'Als je ' + nf(x) + ' bij het eerste getal doet, doe je ook ' + nf(x) + ' bij het tweede: ' + nf(b) + ' + ' + nf(x) + ' = ' + nf(b + x) + '.', key: t + ':h' + a + b + x };
+    }
+    u = y === 5 ? pick([1000, 10000]) : pick([100000, 1000000]);
+    base = rnd(2, 9) * u; d = pick([1, 2, 3, 4, 5]);
+    if (Math.random() < 0.5) {
+      a = base - d; b = rd(y === 5 ? 4 : 6);
+      ans = a + b;
+      return { topic: t, cat: t, type: 'plus', prompt: 'Reken handig: rond een getal af op een rond getal.', text: nf(a) + ' + ' + nf(b), ans: ans, key: t + ':' + a + '+' + b };
+    }
+    b = base - d; a = base + rd(y === 5 ? 4 : 6);
+    ans = a - b;
+    return { topic: t, cat: t, type: 'min', prompt: 'Reken handig: rond een getal af op een rond getal.', text: nf(a) + ' − ' + nf(b), ans: ans, key: t + ':' + a + '-' + b };
+  }
+  function genY(y, t) {
+    var r, type;
+    if (y === 1) return genY1(t);
+    if (t === 1) { var q = genY(y - 1, pick(YBASIC[y - 1])); q.topic = 1; q.cat = 1; q.key = 'h' + q.key; return q; }
+    if (y === 2 && t === 2) return genTens();
+    if (y === 2 && t === 8) return genShop100();
+    if (y <= 4) {
+      if (t === 2) return genRoundY(y, t);
+      if (t >= 3 && t <= 6) {
+        type = (t === 3 || t === 5) ? 'plus' : 'min';
+        r = sumRaw(y, type, t >= 5);
+        return plainQ(t, type, r.a, r.b);
+      }
+      if (t === 7) return genMissY(y, t);
+      return genEstY(y, t);
+    }
+    if (t === 2) return genRoundY(y, t);
+    if (t === 3 || t === 4) { type = t === 3 ? 'plus' : 'min'; r = sumRaw(y, type, null); return plainQ(t, type, r.a, r.b); }
+    if (t === 5) return genMultiY(y, t);
+    if (t === 6) return genMissY(y, t);
+    if (t === 7) return genEstY(y, t);
+    return genHandyY(y, t);
+  }
+  function yset() { return K.ys[K.year] || (K.ys[K.year] = { known: [], later: [] }); }
+  function yPractice(y) {
+    var s = K.ys[y || K.year] || { known: [], later: [] };
+    return YALL.filter(function (n) { return s.known.indexOf(n) < 0 && s.later.indexOf(n) < 0; });
+  }
+  function yTopicName(y, n) { return YT[y][n - 1][0]; }
+  function buildY() {
+    var y = K.year, s = yset(), prac = yPractice(y), known = K.yr ? s.known.slice() : [];
+    function bag(list) { var b = []; return function () { if (!b.length) b = shuffle(list.slice()); return b.pop(); }; }
+    var dp = bag(prac), dk = known.length ? bag(known) : null, out = [], seen = {};
+    for (var i = 0; i < K.count; i++) {
+      var q, tries = 0;
+      do {
+        q = genY((y), (dk && Math.random() < 0.2) ? dk() : dp());
+        tries++;
+      } while (seen[q.key] && tries < 25);
+      seen[q.key] = true; q.id = i; out.push(q);
+    }
+    return out;
+  }
+
+  var ytilesEl = $('ytiles'), ytopicsEl = $('ytopics');
+  YLAB.forEach(function (lab, y) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tile';
+    b.setAttribute('role', 'radio');
+    b.dataset.y = y;
+    b.innerHTML = '<span class="num">' + (y ? y : 'Vrij') + '</span><span class="lab">' + lab + '</span>';
+    ytilesEl.appendChild(b);
+  });
+  ytilesEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.tile');
+    if (!b) return;
+    K.year = +b.dataset.y;
+    save(); renderSetup();
+  });
+  ytopicsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.tile');
+    if (!b) return;
+    var n = +b.dataset.n, s = yset(), i = s.known.indexOf(n), j = s.later.indexOf(n);
+    if (i > -1) { s.known.splice(i, 1); s.later.push(n); }
+    else if (j > -1) { s.later.splice(j, 1); }
+    else { s.known.push(n); }
+    save(); renderSetup();
+  });
+  $('yAllPractice').addEventListener('click', function () { var s = yset(); s.known = []; s.later = []; save(); renderSetup(); });
+  $('yAllKnown').addEventListener('click', function () { var s = yset(); s.known = YALL.slice(); s.later = []; save(); renderSetup(); });
+  $('yReview').addEventListener('click', function () { K.yr = !K.yr; save(); renderSetup(); });
+  function renderYearTiles() {
+    ytilesEl.querySelectorAll('.tile').forEach(function (b) {
+      var y = +b.dataset.y, on = (y === K.year);
+      b.dataset.state = on ? 'practice' : 'known';
+      b.setAttribute('aria-checked', String(on));
+      b.setAttribute('aria-label', y ? 'Leerjaar ' + y + ', ' + YLAB[y] : 'Vrij kiezen');
+    });
+  }
+  function renderYear() {
+    var y = K.year, s = yset();
+    if (ytopicsEl.dataset.y !== String(y)) {
+      ytopicsEl.innerHTML = '';
+      YT[y].forEach(function (t, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tile';
+        b.dataset.n = i + 1;
+        b.innerHTML = '<span class="num">' + t[1] + '</span><span class="nm">' + t[0] + '</span><span class="lab"></span>';
+        ytopicsEl.appendChild(b);
+      });
+      ytopicsEl.dataset.y = String(y);
+    }
+    ytopicsEl.querySelectorAll('.tile').forEach(function (b) {
+      var n = +b.dataset.n;
+      var st = s.known.indexOf(n) > -1 ? 'known' : s.later.indexOf(n) > -1 ? 'later' : 'practice';
+      var name = st === 'known' ? 'gekend' : st === 'later' ? 'nog niet gezien' : 'oefenen';
+      b.dataset.state = st;
+      b.setAttribute('aria-label', yTopicName(y, n) + ': ' + name + '. Tik om te wisselen.');
+      b.querySelector('.lab').innerHTML = st === 'known' ? CHECK + 'gekend' : name;
+    });
+    $('yReview').setAttribute('aria-checked', String(K.yr));
+    document.querySelectorAll('#setupR [data-count]').forEach(function (b) { b.setAttribute('aria-checked', String(+b.dataset.count === K.count)); });
+    var prac = yPractice(y), sum;
+    if (!prac.length) sum = 'Er is geen onderdeel om te oefenen. Zet er minstens één op oefenen.';
+    else {
+      sum = 'Leerjaar ' + y + ', ' + YLAB[y] + ': ' + (prac.length === YALL.length ? 'je oefent alle onderdelen.'
+        : prac.length <= 3 ? 'je oefent ' + listNL(prac.map(function (id) { return yTopicName(y, id).toLowerCase(); })) + '.'
+        : 'je oefent ' + prac.length + ' van de ' + YALL.length + ' onderdelen.');
+      if (s.later.length) sum += ' ' + (s.later.length === 1 ? '1 onderdeel komt' : s.later.length + ' onderdelen komen') + ' nog niet aan bod.';
+    }
+    return { text: sum, ok: prac.length > 0 };
+  }
+  function renderRek() {
+    renderYearTiles();
+    var y = K.year;
+    $('freeBox').hidden = !!y;
+    $('freeOpts').hidden = !!y;
+    $('yearBox').hidden = !y;
+    $('yReviewField').hidden = !y;
+    return y ? renderYear() : renderRekFree();
+  }
+  function renderSuggestY() {
+    var box = $('suggest'), y = S.yr;
+    box.innerHTML = '';
+    box.hidden = !(S.perfect.length || S.weak.length);
+    function names(list) { return listNL(list.map(function (id) { return '"' + yTopicName(y, id) + '"'; })); }
+    if (S.perfect.length) {
+      var d1 = document.createElement('div'), many = S.perfect.length > 1;
+      d1.innerHTML = '<p></p>';
+      d1.firstChild.textContent = S.didKnown
+        ? (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' staan' : ' staat') + ' nu op gekend.'
+        : (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Zet je ' + (many ? 'ze' : 'het') + ' op gekend?';
+      if (!S.didKnown) {
+        var b1 = document.createElement('button');
+        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Zet op gekend';
+        b1.addEventListener('click', function () {
+          var s = K.ys[y] || (K.ys[y] = { known: [], later: [] });
+          S.perfect.forEach(function (t) { if (s.known.indexOf(t) < 0) s.known.push(t); });
+          S.didKnown = true; save(); renderSuggestY();
+        });
+        d1.appendChild(b1);
+      }
+      box.appendChild(d1);
+    }
+    if (S.weak.length) {
+      var d2 = document.createElement('div'), many2 = S.weak.length > 1;
+      d2.innerHTML = '<p></p>';
+      d2.firstChild.textContent = S.didBack
+        ? (many2 ? 'De onderdelen ' : 'Het onderdeel ') + names(S.weak) + (many2 ? ' staan' : ' staat') + ' weer op oefenen.'
+        : (many2 ? 'De onderdelen ' : 'Het onderdeel ') + names(S.weak) + ' stond' + (many2 ? 'en' : '') + ' op gekend, maar daar ging iets mis. Terug naar oefenen?';
+      if (!S.didBack) {
+        var b2 = document.createElement('button');
+        b2.type = 'button'; b2.className = 'small-btn'; b2.textContent = 'Terug naar oefenen';
+        b2.addEventListener('click', function () {
+          var s = K.ys[y] || (K.ys[y] = { known: [], later: [] });
+          s.known = s.known.filter(function (t) { return S.weak.indexOf(t) < 0; });
+          S.didBack = true; save(); renderSuggestY();
+        });
+        d2.appendChild(b2);
+      }
+      box.appendChild(d2);
+    }
   }
 
   /* ---------- Breuken ---------- */
@@ -1323,8 +1737,9 @@ h1 {
   function startSession() {
     if (state.section === 't' && !practiceList().length) return;
     if (state.section === 'b' && !bPractice().length) return;
+    if (state.section === 'r' && K.year && !yPractice().length) return;
     var qs = build();
-    S = { queue: qs.slice(), total: qs.length, solved: {}, solvedN: 0, first: {}, stat: {}, input: '', phase: 'answer', cur: null, section: state.section, knownAtStart: (state.section === 'b' ? B.known : T.known).slice() };
+    S = { queue: qs.slice(), total: qs.length, solved: {}, solvedN: 0, first: {}, stat: {}, input: '', phase: 'answer', cur: null, section: state.section, knownAtStart: (state.section === 'b' ? B.known : (state.section === 'r' && K.year) ? yset().known : T.known).slice(), yr: state.section === 'r' ? K.year : 0 };
     var p = $('progress');
     p.innerHTML = '';
     for (var i = 0; i < S.total; i++) p.appendChild(document.createElement('span'));
@@ -1367,7 +1782,7 @@ h1 {
     S.input = ''; S.parts = ['', '']; S.slot = 0; S.choice = null; S.picked = [];
     S.phase = 'answer';
     if (kind) {
-      ex.className = 'expr b';
+      ex.className = 'expr b' + (q.html.replace(/<[^>]*>/g, '').length > 14 ? ' long' : '');
       ex.innerHTML = q.html.replace('{ans}', ansHTML(q));
       ex.hidden = !q.html;
       ex.setAttribute('aria-label', q.aria || '');
@@ -1376,7 +1791,7 @@ h1 {
       ex.innerHTML = '<span id="qText"></span><span id="eq">=</span><span class="answer" id="answer"></span>';
       $('qText').textContent = q.text;
       ex.setAttribute('aria-label', q.text.replace('×', 'maal').replace(':', 'gedeeld door').replace('+', 'plus').replace('−', 'min'));
-      ex.className = 'expr' + (q.text.length > 9 ? ' long' : '');
+      ex.className = 'expr' + (q.text.length > 12 ? ' xlong' : q.text.length > 9 ? ' long' : '');
     }
     var p = $('qPrompt'); p.hidden = !q.prompt; p.textContent = q.prompt || '';
     var v = $('qVisual'); v.hidden = !q.visual; v.innerHTML = q.visual || ''; v.classList.toggle('pick', kind === 'color');
@@ -1405,7 +1820,7 @@ h1 {
       renderAnswer();
       return;
     }
-    if (q.kind === 'color' || q.kind === 'choice' || S.input.length >= 5) return;
+    if (q.kind === 'color' || q.kind === 'choice' || S.input.length >= 10) return;
     S.input = S.input === '0' ? d : S.input + d;
     renderAnswer();
   }
@@ -1589,6 +2004,22 @@ h1 {
       });
       renderSuggest();
       $('back').textContent = 'Tafels kiezen';
+    } else if (S.yr) {
+      $('statsTitle').textContent = 'Per onderdeel';
+      var yts = Object.keys(S.stat).map(Number).sort(function (a, b) { return a - b; });
+      S.perfect = yts.filter(function (t) { return S.stat[t].n >= 2 && S.stat[t].ok === S.stat[t].n && S.knownAtStart.indexOf(t) < 0; });
+      S.weak = yts.filter(function (t) { return S.knownAtStart.indexOf(t) > -1 && S.stat[t].ok < S.stat[t].n; });
+      yts.forEach(function (t) {
+        var st = S.stat[t], perfect = st.ok === st.n;
+        var row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = '<div class="n yi">' + YT[S.yr][t - 1][1] + '</div>' +
+          '<div><div class="t">' + YT[S.yr][t - 1][0] + ': ' + st.ok + ' van ' + st.n + ' meteen juist</div><div class="bar"><i style="width:' + Math.round(st.ok / st.n * 100) + '%"></i></div></div>' +
+          '<span class="chip ' + (perfect ? 'good' : 'work') + '">' + (perfect ? 'Foutloos' : 'Nog oefenen') + '</span>';
+        stats.appendChild(row);
+      });
+      renderSuggestY();
+      $('back').textContent = 'Instellingen aanpassen';
     } else {
       $('statsTitle').textContent = 'Per soort som';
       ['plus-n', 'plus-b', 'min-n', 'min-b', 'plus', 'min'].forEach(function (k) {
@@ -1693,7 +2124,7 @@ h1 {
     }
   }
   $('again').addEventListener('click', function () {
-    if (S && ((S.section === 't' && !practiceList().length) || (S.section === 'b' && !bPractice().length))) { renderSetup(); show('setup'); return; }
+    if (S && ((S.section === 't' && !practiceList().length) || (S.section === 'b' && !bPractice().length) || (S.section === 'r' && S.yr && !yPractice(S.yr).length))) { renderSetup(); show('setup'); return; }
     startSession();
   });
   $('back').addEventListener('click', function () { renderSetup(); show('setup'); });
