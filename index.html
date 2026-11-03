@@ -523,12 +523,12 @@ h1 {
         <div class="panel-head">
           <h2>Welke tafels?</h2>
           <div class="quick">
-            <button type="button" class="small-btn" id="allPractice">Alles oefenen</button>
-            <button type="button" class="small-btn" id="allKnown">Alles gekend</button>
+            <button type="button" class="small-btn" id="allPractice">Alles selecteren</button>
+            <button type="button" class="small-btn" id="allKnown">Niets selecteren</button>
           </div>
         </div>
         <div class="tiles" id="tiles"></div>
-        <p class="legend">Geel gemarkeerd: je oefent die tafel. Streepjeslijn: je kent die tafel al. Doorgestreept en gearceerd: de juf heeft die tafel nog niet gezien, die komt niet aan bod.</p>
+        <p class="legend">Tik om aan te vinken wat je wilt oefenen. Een tweede tik vinkt het weer uit. Wat niet aangevinkt is, komt niet aan bod.</p>
         <div id="slotGameT"></div>
       </div>
 
@@ -551,7 +551,7 @@ h1 {
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" hidden>
           <button type="button" class="switch" id="review" role="switch" aria-checked="true">
             <span class="track" aria-hidden="true"></span>
             <span class="txt">Gekende tafels af en toe herhalen<small>Ongeveer één vraag op vijf komt uit een tafel die je kent.</small></span>
@@ -578,12 +578,12 @@ h1 {
           <div class="panel-head yhead">
             <h2>Welke onderdelen?</h2>
             <div class="quick">
-              <button type="button" class="small-btn" id="yAllPractice">Alles oefenen</button>
-              <button type="button" class="small-btn" id="yAllKnown">Alles gekend</button>
+              <button type="button" class="small-btn" id="yAllPractice">Alles selecteren</button>
+              <button type="button" class="small-btn" id="yAllKnown">Niets selecteren</button>
             </div>
           </div>
           <div class="tiles topics yt" id="ytopics"></div>
-          <p class="legend">Geel gemarkeerd: je oefent dit onderdeel. Streepjeslijn: je kent het al. Doorgestreept en gearceerd: de juf heeft het nog niet gezien, dus het komt niet aan bod.</p>
+          <p class="legend">Tik om aan te vinken wat je wilt oefenen. Een tweede tik vinkt het weer uit. Wat niet aangevinkt is, komt niet aan bod.</p>
         </div>
         <div id="slotGameR"></div>
       </div>
@@ -648,12 +648,12 @@ h1 {
         <div class="panel-head">
           <h2>Welke onderwerpen?</h2>
           <div class="quick">
-            <button type="button" class="small-btn" id="bAllPractice">Alles oefenen</button>
-            <button type="button" class="small-btn" id="bAllKnown">Alles gekend</button>
+            <button type="button" class="small-btn" id="bAllPractice">Alles selecteren</button>
+            <button type="button" class="small-btn" id="bAllKnown">Niets selecteren</button>
           </div>
         </div>
         <div class="tiles topics" id="btiles"></div>
-        <p class="legend">Geel gemarkeerd: je oefent dit onderwerp. Streepjeslijn: je kent het al. Doorgestreept en gearceerd: de juf heeft het nog niet gezien, dus het komt niet aan bod.</p>
+        <p class="legend">Tik om aan te vinken wat je wilt oefenen. Een tweede tik vinkt het weer uit. Wat niet aangevinkt is, komt niet aan bod.</p>
         <div id="slotGameB"></div>
       </div>
 
@@ -676,7 +676,7 @@ h1 {
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" hidden>
           <button type="button" class="switch" id="bReview" role="switch" aria-checked="true">
             <span class="track" aria-hidden="true"></span>
             <span class="txt">Gekende onderwerpen af en toe herhalen<small>Ongeveer één vraag op vijf komt uit een onderwerp dat je kent.</small></span>
@@ -860,7 +860,9 @@ h1 {
       if (typeof s[k] === 'number' && s[k] >= 0 && s[k] < 100000) state[k] = Math.floor(s[k]);
     });
   }
+  function foldKnown(o) { o.known.forEach(function (n) { if (o.later.indexOf(n) < 0) o.later.push(n); }); o.known = []; }
   function load() {
+    T.later = ALL.slice(); B.later = BALL.slice();
     try {
       var raw = localStorage.getItem(KEY), s;
       if (raw) {
@@ -873,6 +875,8 @@ h1 {
         if (o1) { s = JSON.parse(o1); readT(s); readShared(s); }
         if (o2) { s = JSON.parse(o2); readK(s); if (!o1) readShared(s); }
       }
+      foldKnown(T); foldKnown(B);
+      Object.keys(K.ys).forEach(function (y) { foldKnown(K.ys[y]); });
       while (state.series >= state.goal) { state.series -= state.goal; state.games++; }
     } catch (e) { /* opslag niet beschikbaar */ }
   }
@@ -942,15 +946,13 @@ h1 {
   tilesEl.addEventListener('click', function (e) {
     var b = e.target.closest('.tile');
     if (!b) return;
-    var n = +b.dataset.n, i = T.known.indexOf(n), j = T.later.indexOf(n);
-    /* oefenen -> gekend -> nog niet gezien -> oefenen */
-    if (i > -1) { T.known.splice(i, 1); T.later.push(n); }
-    else if (j > -1) { T.later.splice(j, 1); }
-    else { T.known.push(n); }
+    var n = +b.dataset.n, j = T.later.indexOf(n);
+    T.known = [];
+    if (j > -1) T.later.splice(j, 1); else T.later.push(n);
     save(); renderSetup();
   });
   $('allPractice').addEventListener('click', function () { T.known = []; T.later = []; save(); renderSetup(); });
-  $('allKnown').addEventListener('click', function () { T.known = ALL.slice(); T.later = []; save(); renderSetup(); });
+  $('allKnown').addEventListener('click', function () { T.known = []; T.later = ALL.slice(); save(); renderSetup(); });
   document.querySelectorAll('#setupT [data-mode]').forEach(function (b) {
     b.addEventListener('click', function () { T.mode = b.dataset.mode; save(); renderSetup(); });
   });
@@ -962,23 +964,20 @@ h1 {
   function renderTafels() {
     tilesEl.querySelectorAll('.tile').forEach(function (b) {
       var n = +b.dataset.n;
-      var st = T.known.indexOf(n) > -1 ? 'known' : T.later.indexOf(n) > -1 ? 'later' : 'practice';
-      var name = st === 'known' ? 'gekend' : st === 'later' ? 'nog niet gezien' : 'oefenen';
-      b.dataset.state = st;
-      b.setAttribute('aria-label', 'Tafel ' + n + ': ' + name + '. Tik om te wisselen.');
-      b.querySelector('.lab').innerHTML = st === 'known' ? CHECK + 'gekend' : name;
+      var on = T.later.indexOf(n) < 0 && T.known.indexOf(n) < 0;
+      b.dataset.state = on ? 'practice' : 'known';
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', String(on));
+      b.setAttribute('aria-label', 'Tafel ' + n);
+      b.querySelector('.lab').innerHTML = on ? CHECK + 'oefenen' : 'overslaan';
     });
     document.querySelectorAll('#setupT [data-mode]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.mode === T.mode)); });
     document.querySelectorAll('#setupT [data-count]').forEach(function (b) { b.setAttribute('aria-checked', String(+b.dataset.count === T.count)); });
     $('review').setAttribute('aria-checked', String(T.review));
     var prac = practiceList();
     var sum = !prac.length
-      ? 'Er is geen tafel om te oefenen. Zet er minstens één op oefenen.'
+      ? 'Je hebt nog geen tafel aangevinkt. Vink er minstens één aan om te starten.'
       : prac.length === ALL.length ? 'Je oefent alle tafels.' : 'Je oefent tafel ' + listNL(prac) + '.';
-    if (prac.length && T.later.length) {
-      var lat = T.later.slice().sort(function (a, b) { return a - b; });
-      sum += ' Tafel ' + listNL(lat) + ' komt nog niet aan bod.';
-    }
     return { text: sum, ok: prac.length > 0 };
   }
 
@@ -1053,9 +1052,9 @@ h1 {
 
   /* ---------- Kiezen tussen tafels en optellen en aftrekken ---------- */
   var LEAD = {
-    t: 'Tik op een tafel om te wisselen tussen oefenen, gekend en nog niet gezien in de klas. Je krijgt alleen sommen uit de tafels die je oefent.',
+    t: 'Vink de tafels aan die je wilt oefenen. Je krijgt alleen sommen uit de tafels die je aanvinkt.',
     r: 'Oefen optellen en aftrekken. Kies je leerjaar, of kies Vrij om zelf te bepalen hoe ver je rekent.',
-    b: 'Oefen breuken zoals je ze in het lager leert: aflezen, kleuren, vergelijken, gelijkwaardige breuken, rekenen en kommagetallen. Tik op een onderwerp om te wisselen tussen oefenen, gekend en nog niet gezien in de klas.'
+    b: 'Oefen breuken zoals je ze in het lager leert: aflezen, kleuren, vergelijken, gelijkwaardige breuken, rekenen en kommagetallen. Vink de onderwerpen aan die je wilt oefenen.'
   };
   function placeShared() {
     var suf = { t: 'T', r: 'R', b: 'B' }[state.section];
@@ -1349,9 +1348,10 @@ h1 {
     if (t === 7) return genEstY(y, t);
     return genHandyY(y, t);
   }
-  function yset() { return K.ys[K.year] || (K.ys[K.year] = { known: [], later: [] }); }
+  function ydef() { return { known: [], later: YALL.slice() }; }
+  function yset() { return K.ys[K.year] || (K.ys[K.year] = ydef()); }
   function yPractice(y) {
-    var s = K.ys[y || K.year] || { known: [], later: [] };
+    var s = K.ys[y || K.year] || ydef();
     return YALL.filter(function (n) { return s.known.indexOf(n) < 0 && s.later.indexOf(n) < 0; });
   }
   function yTopicName(y, n) { return YT[y][n - 1][0]; }
@@ -1389,14 +1389,13 @@ h1 {
   ytopicsEl.addEventListener('click', function (e) {
     var b = e.target.closest('.tile');
     if (!b) return;
-    var n = +b.dataset.n, s = yset(), i = s.known.indexOf(n), j = s.later.indexOf(n);
-    if (i > -1) { s.known.splice(i, 1); s.later.push(n); }
-    else if (j > -1) { s.later.splice(j, 1); }
-    else { s.known.push(n); }
+    var n = +b.dataset.n, s = yset(), j = s.later.indexOf(n);
+    s.known = [];
+    if (j > -1) s.later.splice(j, 1); else s.later.push(n);
     save(); renderSetup();
   });
   $('yAllPractice').addEventListener('click', function () { var s = yset(); s.known = []; s.later = []; save(); renderSetup(); });
-  $('yAllKnown').addEventListener('click', function () { var s = yset(); s.known = YALL.slice(); s.later = []; save(); renderSetup(); });
+  $('yAllKnown').addEventListener('click', function () { var s = yset(); s.known = []; s.later = YALL.slice(); save(); renderSetup(); });
   $('yReview').addEventListener('click', function () { K.yr = !K.yr; save(); renderSetup(); });
   function renderYearTiles() {
     ytilesEl.querySelectorAll('.tile').forEach(function (b) {
@@ -1422,21 +1421,21 @@ h1 {
     }
     ytopicsEl.querySelectorAll('.tile').forEach(function (b) {
       var n = +b.dataset.n;
-      var st = s.known.indexOf(n) > -1 ? 'known' : s.later.indexOf(n) > -1 ? 'later' : 'practice';
-      var name = st === 'known' ? 'gekend' : st === 'later' ? 'nog niet gezien' : 'oefenen';
-      b.dataset.state = st;
-      b.setAttribute('aria-label', yTopicName(y, n) + ': ' + name + '. Tik om te wisselen.');
-      b.querySelector('.lab').innerHTML = st === 'known' ? CHECK + 'gekend' : name;
+      var on = s.later.indexOf(n) < 0 && s.known.indexOf(n) < 0;
+      b.dataset.state = on ? 'practice' : 'known';
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', String(on));
+      b.setAttribute('aria-label', yTopicName(y, n));
+      b.querySelector('.lab').innerHTML = on ? CHECK + 'oefenen' : 'overslaan';
     });
     $('yReview').setAttribute('aria-checked', String(K.yr));
     document.querySelectorAll('#setupR [data-count]').forEach(function (b) { b.setAttribute('aria-checked', String(+b.dataset.count === K.count)); });
     var prac = yPractice(y), sum;
-    if (!prac.length) sum = 'Er is geen onderdeel om te oefenen. Zet er minstens één op oefenen.';
+    if (!prac.length) sum = 'Je hebt nog geen onderdeel aangevinkt. Vink er minstens één aan om te starten.';
     else {
       sum = 'Leerjaar ' + y + ', ' + YLAB[y] + ': ' + (prac.length === YALL.length ? 'je oefent alle onderdelen.'
         : prac.length <= 3 ? 'je oefent ' + listNL(prac.map(function (id) { return yTopicName(y, id).toLowerCase(); })) + '.'
         : 'je oefent ' + prac.length + ' van de ' + YALL.length + ' onderdelen.');
-      if (s.later.length) sum += ' ' + (s.later.length === 1 ? '1 onderdeel komt' : s.later.length + ' onderdelen komen') + ' nog niet aan bod.';
     }
     return { text: sum, ok: prac.length > 0 };
   }
@@ -1446,7 +1445,7 @@ h1 {
     $('freeBox').hidden = !!y;
     $('freeOpts').hidden = !!y;
     $('yearBox').hidden = !y;
-    $('yReviewField').hidden = !y;
+    $('yReviewField').hidden = true;
     return y ? renderYear() : renderRekFree();
   }
   function renderSuggestY() {
@@ -1458,14 +1457,14 @@ h1 {
       var d1 = document.createElement('div'), many = S.perfect.length > 1;
       d1.innerHTML = '<p></p>';
       d1.firstChild.textContent = S.didKnown
-        ? (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' staan' : ' staat') + ' nu op gekend.'
-        : (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Zet je ' + (many ? 'ze' : 'het') + ' op gekend?';
+        ? (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' zijn' : ' is') + ' nu uitgevinkt.'
+        : (many ? 'De onderdelen ' : 'Het onderdeel ') + names(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Wil je ' + (many ? 'ze' : 'het') + ' uitvinken?';
       if (!S.didKnown) {
         var b1 = document.createElement('button');
-        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Zet op gekend';
+        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Uitvinken';
         b1.addEventListener('click', function () {
-          var s = K.ys[y] || (K.ys[y] = { known: [], later: [] });
-          S.perfect.forEach(function (t) { if (s.known.indexOf(t) < 0) s.known.push(t); });
+          var s = K.ys[y] || (K.ys[y] = ydef());
+          S.perfect.forEach(function (t) { if (s.later.indexOf(t) < 0) s.later.push(t); });
           S.didKnown = true; save(); renderSuggestY();
         });
         d1.appendChild(b1);
@@ -1482,7 +1481,7 @@ h1 {
         var b2 = document.createElement('button');
         b2.type = 'button'; b2.className = 'small-btn'; b2.textContent = 'Terug naar oefenen';
         b2.addEventListener('click', function () {
-          var s = K.ys[y] || (K.ys[y] = { known: [], later: [] });
+          var s = K.ys[y] || (K.ys[y] = ydef());
           s.known = s.known.filter(function (t) { return S.weak.indexOf(t) < 0; });
           S.didBack = true; save(); renderSuggestY();
         });
@@ -1694,15 +1693,13 @@ h1 {
   btilesEl.addEventListener('click', function (e) {
     var b = e.target.closest('.tile');
     if (!b) return;
-    var n = +b.dataset.n, i = B.known.indexOf(n), j = B.later.indexOf(n);
-    /* oefenen -> gekend -> nog niet gezien -> oefenen */
-    if (i > -1) { B.known.splice(i, 1); B.later.push(n); }
-    else if (j > -1) { B.later.splice(j, 1); }
-    else { B.known.push(n); }
+    var n = +b.dataset.n, j = B.later.indexOf(n);
+    B.known = [];
+    if (j > -1) B.later.splice(j, 1); else B.later.push(n);
     save(); renderSetup();
   });
   $('bAllPractice').addEventListener('click', function () { B.known = []; B.later = []; save(); renderSetup(); });
-  $('bAllKnown').addEventListener('click', function () { B.known = BALL.slice(); B.later = []; save(); renderSetup(); });
+  $('bAllKnown').addEventListener('click', function () { B.known = []; B.later = BALL.slice(); save(); renderSetup(); });
   document.querySelectorAll('[data-bdiff]').forEach(function (b) {
     b.addEventListener('click', function () { B.diff = b.dataset.bdiff; save(); renderSetup(); });
   });
@@ -1713,22 +1710,22 @@ h1 {
   function renderBreuken() {
     btilesEl.querySelectorAll('.tile').forEach(function (b) {
       var n = +b.dataset.n;
-      var st = B.known.indexOf(n) > -1 ? 'known' : B.later.indexOf(n) > -1 ? 'later' : 'practice';
-      var name = st === 'known' ? 'gekend' : st === 'later' ? 'nog niet gezien' : 'oefenen';
-      b.dataset.state = st;
-      b.setAttribute('aria-label', topicName(n) + ': ' + name + '. Tik om te wisselen.');
-      b.querySelector('.lab').innerHTML = st === 'known' ? CHECK + 'gekend' : name;
+      var on = B.later.indexOf(n) < 0 && B.known.indexOf(n) < 0;
+      b.dataset.state = on ? 'practice' : 'known';
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', String(on));
+      b.setAttribute('aria-label', topicName(n));
+      b.querySelector('.lab').innerHTML = on ? CHECK + 'oefenen' : 'overslaan';
     });
     document.querySelectorAll('[data-bdiff]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.bdiff === B.diff)); });
     document.querySelectorAll('[data-bcount]').forEach(function (b) { b.setAttribute('aria-checked', String(+b.dataset.bcount === B.count)); });
     $('bReview').setAttribute('aria-checked', String(B.review));
     var prac = bPractice(), sum;
-    if (!prac.length) sum = 'Er is geen onderwerp om te oefenen. Zet er minstens één op oefenen.';
+    if (!prac.length) sum = 'Je hebt nog geen onderwerp aangevinkt. Vink er minstens één aan om te starten.';
     else {
       sum = (prac.length === BALL.length ? 'Je oefent alle onderwerpen'
         : prac.length <= 3 ? 'Je oefent ' + listNL(prac.map(function (id) { return topicName(id).toLowerCase(); }))
         : 'Je oefent ' + prac.length + ' van de ' + BALL.length + ' onderwerpen') + ', ' + { easy: 'makkelijk', mid: 'gemiddeld', hard: 'moeilijk' }[B.diff] + '.';
-      if (B.later.length) sum += ' ' + (B.later.length === 1 ? '1 onderwerp komt' : B.later.length + ' onderwerpen komen') + ' nog niet aan bod.';
     }
     return { text: sum, ok: prac.length > 0 };
   }
@@ -2051,13 +2048,13 @@ h1 {
       var many = S.perfect.length > 1;
       d1.innerHTML = '<p></p>';
       d1.firstChild.textContent = S.didKnown
-        ? (many ? 'Tafels ' : 'Tafel ') + listNL(S.perfect) + (many ? ' staan' : ' staat') + ' nu op gekend.'
-        : (many ? 'Tafels ' : 'Tafel ') + listNL(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Zet je ' + (many ? 'ze' : 'hem') + ' op gekend?';
+        ? (many ? 'Tafels ' : 'Tafel ') + listNL(S.perfect) + (many ? ' zijn' : ' is') + ' nu uitgevinkt.'
+        : (many ? 'Tafels ' : 'Tafel ') + listNL(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Wil je ' + (many ? 'ze' : 'hem') + ' uitvinken?';
       if (!S.didKnown) {
         var b1 = document.createElement('button');
-        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Zet op gekend';
+        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Uitvinken';
         b1.addEventListener('click', function () {
-          S.perfect.forEach(function (t) { if (T.known.indexOf(t) < 0) T.known.push(t); });
+          S.perfect.forEach(function (t) { if (T.later.indexOf(t) < 0) T.later.push(t); });
           S.didKnown = true; save(); renderSuggest();
         });
         d1.appendChild(b1);
@@ -2092,13 +2089,13 @@ h1 {
       var d1 = document.createElement('div'), many = S.perfect.length > 1;
       d1.innerHTML = '<p></p>';
       d1.firstChild.textContent = S.didKnown
-        ? (many ? 'De onderwerpen ' : 'Het onderwerp ') + names(S.perfect) + (many ? ' staan' : ' staat') + ' nu op gekend.'
-        : (many ? 'De onderwerpen ' : 'Het onderwerp ') + names(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Zet je ' + (many ? 'ze' : 'het') + ' op gekend?';
+        ? (many ? 'De onderwerpen ' : 'Het onderwerp ') + names(S.perfect) + (many ? ' zijn' : ' is') + ' nu uitgevinkt.'
+        : (many ? 'De onderwerpen ' : 'Het onderwerp ') + names(S.perfect) + (many ? ' gingen' : ' ging') + ' foutloos. Wil je ' + (many ? 'ze' : 'het') + ' uitvinken?';
       if (!S.didKnown) {
         var b1 = document.createElement('button');
-        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Zet op gekend';
+        b1.type = 'button'; b1.className = 'small-btn'; b1.textContent = 'Uitvinken';
         b1.addEventListener('click', function () {
-          S.perfect.forEach(function (t) { if (B.known.indexOf(t) < 0) B.known.push(t); });
+          S.perfect.forEach(function (t) { if (B.later.indexOf(t) < 0) B.later.push(t); });
           S.didKnown = true; save(); renderSuggestB();
         });
         d1.appendChild(b1);
